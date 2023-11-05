@@ -5,7 +5,7 @@ import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author TODO: YOUR NAME HERE
+ *  @Yenneroul TODO: YOUR NAME HERE
  */
 public class Model extends Observable {
     /** Current contents of the board. */
@@ -113,12 +113,82 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
-
+        Board old_board = this.board;
+        this.board.setViewingPerspective(side);
+        int score = move_all(this.board);
+        if(score != -1) {
+            this.score += score;
+            changed = true;
+        } else {
+            this.score += 0;
+        }
+        this.board.setViewingPerspective(Side.NORTH);
         checkGameOver();
         if (changed) {
             setChanged();
         }
         return changed;
+    }
+    public static int move_all(Board b) {
+        int score = 0;
+        int unmove = 0;
+        for(int col = 0; col < b.size(); col ++) {
+            int col_score = move_col(b, col);
+            if(col_score == -1) {
+                unmove ++;
+            } else {
+            score += col_score;
+            }
+        }
+        if(unmove == b.size()) {
+            return -1;
+        }
+        return score;
+    }
+    public static int  move_col(Board b, int col) {
+        int start_row = b.size() - 1;
+        int score = 0;
+        int whether_move = -1;
+        while(start_row >= 0) {
+            if(move_which(b, col, start_row) == -1) {
+                break;
+            } else {
+                int start = move_which(b, col, start_row);
+                int end = move_where(b, col, start_row, start);
+                if(start != end) {
+                    whether_move = 1;
+                    if(b.move(col, end, b.tile(col,start))) {
+                        start_row --;
+                        score += b.tile(col, end).value();
+                    }
+                } else {
+                    start_row--;
+                 }
+            }
+        }
+        if(whether_move == -1) {
+            return whether_move;
+        }
+        return score;
+    }
+    public static int move_which(Board b, int col, int start_row) {
+        for(int i = start_row - 1; i > -1; i--) {
+            if(b.tile(col, i) != null && b.tile(col, i).value() != 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    public static int move_where(Board b, int col, int start_row, int move_row) {
+        if(b.tile(col, start_row) != null) {
+            if(b.tile(col, move_row).value() == b.tile(col, start_row).value()) {
+                return start_row;
+            } else{
+                return start_row - 1;
+            }
+        } else{
+            return start_row;
+        }
     }
 
     /** Checks if the game is over and sets the gameOver variable
@@ -138,6 +208,14 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        int board_size = b.size();
+        for (int col = 0;col < board_size; col += 1) {
+            for (int row = 0; row < board_size; row += 1) {
+                if (b.tile(col, row) == null) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -148,6 +226,14 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        int board_size = b.size();
+        for(int col = 0; col < board_size; col += 1) {
+            for(int row = 0; row < board_size; row += 1) {
+                if(b.tile(col, row) != null && b.tile(col, row).value() == MAX_PIECE) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -159,9 +245,36 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if (emptySpaceExists(b)) {
+            return true;
+        } else {
+            int board_size = b.size();
+            for (int col = 0; col < board_size; col++) {
+                for(int row = 0; row < board_size; row++) {
+                    if (check_up_rt(b, col, row, board_size)) {
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
-
+    public static boolean check_up_rt(Board b, int col, int row, int board_size) {
+        int right = col + 1;
+        int up = row + 1;
+        boolean has_right = right < board_size, has_up = up < board_size;
+        if (has_right) {
+            if (b.tile(col, row).value() == b.tile(right, row).value()) {
+                return true;
+            }
+        }
+        if (has_up) {
+            if (b.tile(col, row).value() == b.tile(col, up).value()) {
+                return true;
+            }
+        }
+        return  false;
+    }
 
     @Override
      /** Returns the model as a string, used for debugging. */
