@@ -35,16 +35,16 @@ public class ArrayDequeTest {
     @Test
     public void AddMuchNumsAndRemove() {
         ArrayDeque<Integer> test = new ArrayDeque<>();
-        for (int i = 0; i < 16; i++) {
-            test.addFirst(i);
+        for (int i = 0; i < 500; i++) {
+            test.addLast(i);
         }
-        int fisrt = test.get(0);
+        int fisrt = test.get(15);
         assertEquals(15, fisrt);
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 300; i++) {
             test.removeLast();
         }
-        fisrt = test.get(0);
-        assertEquals(15, fisrt);
+        int last = test.get(test.size - 1);
+        assertEquals(199, last);
 
     }
 
@@ -174,4 +174,5 @@ public class ArrayDequeTest {
          */
         assertFalse(testarray.equals(difftype));
     }
+
 }
