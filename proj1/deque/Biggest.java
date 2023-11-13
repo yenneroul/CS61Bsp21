@@ -6,7 +6,7 @@ public class Biggest<T> implements Comparator<T>{
         if (o1 == null) {
             return 0;
         }
-        if (o2 == null) {s
+        if (o2 == null) {
             return 1;
         }
         return (Integer) o1 - (Integer) o2;
